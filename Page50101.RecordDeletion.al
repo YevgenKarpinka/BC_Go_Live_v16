@@ -25,6 +25,12 @@ page 50101 "Record Deletion"
                     CaptionML = ENU = 'Table ID';
                     ToolTip = 'Insert table no. to Delete';
                 }
+                field("Table Name"; Rec."Table Name")
+                {
+                    ApplicationArea = All;
+                    CaptionML = ENU = 'Table Name';
+                    ToolTip = 'Specify table name to Delete';
+                }
             }
         }
     }
