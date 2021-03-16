@@ -2,17 +2,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Microsoft cloud sandbox",
-            "request": "launch",
             "type": "al",
-            "environmentType": "Sandbox",
-            "environmentName": "sandbox",
-            "startupObjectId": 22,
+            "request": "launch",
+            "name": "Your own server",
+            "server": "http://bcserver03.northeurope.cloudapp.azure.com/",
+            "port": 7049,
+            // "server": "http://bcs2.northeurope.cloudapp.azure.com/",
+            // "port": 16049,
+            "serverInstance": "BC160",
+            "authentication": "UserPassword",
+            "startupObjectId": 31,
             "startupObjectType": "Page",
             "breakOnError": true,
             "launchBrowser": true,
             "enableLongRunningSqlStatements": true,
-            "enableSqlInformationDebugger": true
+            "enableSqlInformationDebugger": true,
+            "schemaUpdateMode": "Synchronize" 
         }
     ]
 }

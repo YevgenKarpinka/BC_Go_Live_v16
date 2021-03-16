@@ -22,6 +22,12 @@
       "publisher": "Microsoft",
       "name": "Base Application",
       "version": "16.0.0.0"
+    },
+    {
+      "id": "0fb6c640-2664-4f23-82dc-b9139d06c45d",
+      "publisher": "TComTech",
+      "name": "Sprut_API_v16",
+      "version": "1.0.0.0"
     }
   ],
   "screenshots": [],
@@ -34,5 +40,5 @@
   ],
   "contextSensitiveHelpUrl": "https://BC_Go_Live_v16.com/help/",
   "showMyCode": true,
-  "runtime": "5.0"
+  "runtime": "5.3"
 }
