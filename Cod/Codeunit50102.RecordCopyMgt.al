@@ -77,9 +77,9 @@ codeunit 50102 "Record Copy Mgt."
                         if RecRefFrom.FindSet(false, false) then
                             repeat
                                 CopyRecord(RecRefTo, RecRefFrom);
-                                if RecRefTo.Insert() then RecRefTo.Modify();
+                                if RecRefTo.Insert() then
+                                    RecRefTo.Modify();
                             until RecRefFrom.Next() = 0;
-                        // RecRef.DeleteAll;  //** DELETE DATA FROM TABLES
                         RecRefTo.Close();
                         RecRefFrom.Close;
                     until RecordCopyTable.Next = 0;
@@ -99,18 +99,24 @@ codeunit 50102 "Record Copy Mgt."
 
     local procedure CopyRecord(var RecRefTo: RecordRef; var RecRefFrom: RecordRef)
     var
-        Field: Record Field;
+        locField: Record Field;
+    // FieldRefTo: FieldRef;
+    // FieldRefFrom: FieldRef;
     begin
-        Field.Reset();
-        Field.SetRange(TableNo, RecRefFrom.NUMBER);
-        Field.SetRange(Enabled, TRUE);
-        Field.SetRange(Class, Field.Class::Normal);
-        Field.SetFilter(Type, '<>%1', Field.Type::BLOB);
-        IF Field.FINDSET THEN
+        locField.Reset();
+        locField.SetRange(TableNo, RecRefFrom.NUMBER);
+        locField.SetRange(Enabled, TRUE);
+        locField.SetRange(Class, locField.Class::Normal);
+        // Field.SetFilter(Type, '<>%1', Field.Type::BLOB);
+        IF locField.FindSet(false, false) THEN
             REPEAT
-                RecRefTo := RecRefFrom;
-                RecRefTo.Field("No.") := RecRefFrom.Field(Field."No.");
-                FieldRefTo.Value := FieldRefFrom.Value;
-            UNTIL Field.NEXT = 0;
+                // FieldRefTo := RecRefTo.FIELD(locField."No.");
+                // FieldRefFrom := RecRefFrom.FIELD(locField."No.");
+                if locField.Type = locField.Type::BLOB then
+                    // FieldRefFrom.CalcField();
+                    RecRefFrom.FIELD(locField."No.").CalcField();
+                // FieldRefTo.VALUE := FieldRefFrom.VALUE;
+                RecRefTo.FIELD(locField."No.").Value := RecRefFrom.FIELD(locField."No.").Value;
+            UNTIL locField.NEXT = 0;
     end;
 }
