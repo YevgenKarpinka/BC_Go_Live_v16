@@ -76,9 +76,14 @@ codeunit 50102 "Record Copy Mgt."
                         RecRefTo.Open(RecordCopyTable."Table ID", false, IntegrationCompany."Company Name");
                         if RecRefFrom.FindSet(false, false) then
                             repeat
-                                CopyRecord(RecRefTo, RecRefFrom);
-                                if RecRefTo.Insert() then
+                                if RecRefToFindRec(RecRefTo, RecRefFrom) then begin
+                                    CopyRecord(RecRefTo, RecRefFrom);
                                     RecRefTo.Modify();
+                                end else begin
+                                    CopyRecord(RecRefTo, RecRefFrom);
+                                    RecRefTo.Insert();
+                                end;
+
                             until RecRefFrom.Next() = 0;
                         RecRefTo.Close();
                         RecRefFrom.Close;
@@ -100,23 +105,34 @@ codeunit 50102 "Record Copy Mgt."
     local procedure CopyRecord(var RecRefTo: RecordRef; var RecRefFrom: RecordRef)
     var
         locField: Record Field;
-    // FieldRefTo: FieldRef;
-    // FieldRefFrom: FieldRef;
     begin
-        locField.Reset();
+        locField.SetCurrentKey(Enabled, Class);
         locField.SetRange(TableNo, RecRefFrom.NUMBER);
         locField.SetRange(Enabled, TRUE);
         locField.SetRange(Class, locField.Class::Normal);
-        // Field.SetFilter(Type, '<>%1', Field.Type::BLOB);
         IF locField.FindSet(false, false) THEN
             REPEAT
-                // FieldRefTo := RecRefTo.FIELD(locField."No.");
-                // FieldRefFrom := RecRefFrom.FIELD(locField."No.");
                 if locField.Type = locField.Type::BLOB then
-                    // FieldRefFrom.CalcField();
                     RecRefFrom.FIELD(locField."No.").CalcField();
-                // FieldRefTo.VALUE := FieldRefFrom.VALUE;
                 RecRefTo.FIELD(locField."No.").Value := RecRefFrom.FIELD(locField."No.").Value;
             UNTIL locField.NEXT = 0;
+    end;
+
+    local procedure RecRefToFindRec(RecRefTo: RecordRef; RecRefFrom: RecordRef): Boolean
+    var
+        locField: Record Field;
+    begin
+        locField.SetCurrentKey(Enabled, IsPartOfPrimaryKey);
+        locField.SetRange(TableNo, RecRefFrom.NUMBER);
+        locField.SetRange(Enabled, TRUE);
+        locField.SetRange(IsPartOfPrimaryKey, true);
+        if locField.FindSet(false, false) then begin
+            repeat
+                RecRefTo.Field(locField."No.").SetRange(RecRefFrom.Field(locField."No.").Value);
+            until locField.NEXT = 0;
+
+            exit(RecRefTo.FindFirst());
+        end;
+        exit(false);
     end;
 }
