@@ -49,7 +49,7 @@ codeunit 50102 "Record Copy Mgt."
 
     var
         Text0001: Label 'Copy Records to All Holding?';
-        Text0002: Label 'Copying Records!\Company: #2########\Table: #1#######';
+        Text0002: Label 'Copying Records!\Delete All: #3######\Company: #2########\Table: #1#######';
 
     procedure CopyRecords(var RecordCopyTable: Record "Record Copy Table")
     var
@@ -65,6 +65,7 @@ codeunit 50102 "Record Copy Mgt."
 
         Window.Open(Text0002);
 
+        RecordCopyTable.SetCurrentKey(Rank);
         IntegrationCompany.SetRange("Copy Items To", true);
         if IntegrationCompany.FindSet(false, false) then
             repeat
@@ -74,6 +75,9 @@ codeunit 50102 "Record Copy Mgt."
                         Window.Update(1, Format(RecordCopyTable."Table ID"));
                         RecRefFrom.Open(RecordCopyTable."Table ID", false, CompanyName);
                         RecRefTo.Open(RecordCopyTable."Table ID", false, IntegrationCompany."Company Name");
+                        Window.Update(3, Format(RecordCopyTable."DeleteAll Before"));
+                        if RecordCopyTable."DeleteAll Before" then
+                            RecRefTo.DeleteAll();
                         if RecRefFrom.FindSet(false, false) then
                             repeat
                                 if RecRefToFindRec(RecRefTo, RecRefFrom) then begin
@@ -83,7 +87,6 @@ codeunit 50102 "Record Copy Mgt."
                                     CopyRecord(RecRefTo, RecRefFrom);
                                     RecRefTo.Insert();
                                 end;
-
                             until RecRefFrom.Next() = 0;
                         RecRefTo.Close();
                         RecRefFrom.Close;
@@ -109,6 +112,7 @@ codeunit 50102 "Record Copy Mgt."
         locField.SetCurrentKey(Enabled, Class);
         locField.SetRange(TableNo, RecRefFrom.NUMBER);
         locField.SetRange(Enabled, TRUE);
+        locField.SetRange(ObsoleteState, locField.ObsoleteState::No);
         locField.SetRange(Class, locField.Class::Normal);
         IF locField.FindSet(false, false) THEN
             REPEAT

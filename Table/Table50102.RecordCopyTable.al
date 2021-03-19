@@ -19,6 +19,12 @@ table 50102 "Record Copy Table"
         field(6; Company; Text[30])
         {
         }
+        field(7; "DeleteAll Before"; Boolean)
+        {
+        }
+        field(8; Rank; Integer)
+        {
+        }
     }
 
     keys

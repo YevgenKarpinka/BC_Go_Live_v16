@@ -29,6 +29,19 @@ page 50102 "Record Copying"
                     CaptionML = ENU = 'Table Name';
                     ToolTip = 'Specify table name to Copy';
                 }
+                field(Rank; Rank)
+                {
+                    ApplicationArea = All;
+                    CaptionML = ENU = 'Table Name';
+                    ToolTip = 'Specify rank table to Copy';
+                }
+                field("DeleteAll Before"; "DeleteAll Before")
+                {
+                    ApplicationArea = All;
+                    CaptionML = ENU = 'DeleteAll Before';
+                    ToolTip = 'Specify delete all before Copy';
+                }
+
             }
         }
     }
