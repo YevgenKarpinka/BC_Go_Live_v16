@@ -40,7 +40,7 @@ codeunit 50102 "Record Copy Mgt."
     TableData "Warranty Ledger Entry" = rimd, TableData "Item Budget Entry" = rimd,
     TableData "Production Forecast Entry" = rimd, TableData "Location" = rimd, TableData "Bin" = rimd,
     TableData "Customer" = rimd, TableData "Vendor" = rimd, TableData "Item" = rimd,
-    TableData "Warehouse Entry" = rimd;
+    TableData "Warehouse Entry" = rimd;//, TableData "Bank Directory" = rimd;
     //... ADD COUNTRY LOCALIZATION TABLES, FA, SERVICE etc. etc.
 
     trigger OnRun()
@@ -50,6 +50,7 @@ codeunit 50102 "Record Copy Mgt."
     var
         Text0001: Label 'Copy Records to All Holding?';
         Text0002: Label 'Copying Records!\Delete All: #3######\Company: #2########\Table: #1#######';
+        Text0003: Label 'Blocking Customers!\Company: #1########\Customer: #2#######';
 
     procedure CopyRecords(var RecordCopyTable: Record "Record Copy Table")
     var
@@ -138,5 +139,85 @@ codeunit 50102 "Record Copy Mgt."
             exit(RecRefTo.FindFirst());
         end;
         exit(false);
+    end;
+
+    procedure UpdateBankAccounts()
+    begin
+        UpdateCurrencyCodeCustomerBankAccounts();
+    end;
+
+    procedure UpdateCurrencyCodeCustomerBankAccounts()
+    var
+        Window: Dialog;
+        CustomerBankAccount: Record "Customer Bank Account";
+        VendorBankAccount: Record "Vendor Bank Account";
+        IntegrationCompany: Record "Company Integration";
+        GLSetup: Record "General Ledger Setup";
+        Integration1C: Codeunit "Integration 1C";
+    begin
+        CheckCompanyFrom();
+
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0002);
+
+        if IntegrationCompany.FindSet(false, false) then
+            repeat
+                Window.Update(1, CustomerBankAccount.TableCaption);
+                Window.Update(2, IntegrationCompany."Company Name");
+                CustomerBankAccount.ChangeCompany(IntegrationCompany."Company Name");
+                VendorBankAccount.ChangeCompany(IntegrationCompany."Company Name");
+                GLSetup.ChangeCompany(IntegrationCompany."Company Name");
+                GLSetup.Get();
+
+                // update Bank Directory
+                Integration1C.UpdateBankDirectoryByCompany(IntegrationCompany."Company Name");
+
+                // update Currency Code
+                CustomerBankAccount.SetFilter("Currency Code", '');
+                CustomerBankAccount.ModifyAll("Currency Code", GLSetup."LCY Code");
+
+                VendorBankAccount.SetFilter("Currency Code", '');
+                VendorBankAccount.ModifyAll("Currency Code", GLSetup."LCY Code");
+            until IntegrationCompany.Next() = 0;
+
+        Window.Close;
+    end;
+
+    procedure BlockDeduplCust()
+    var
+        Customer: Record Customer;
+        blockCustomer: Record Customer;
+        Window: Dialog;
+        IntegrationCompany: Record "Company Integration";
+        blanckGuid: Guid;
+    begin
+        CheckCompanyFrom();
+        if not Confirm(Text0001, false) then
+            exit;
+        Window.Open(Text0003);
+        if IntegrationCompany.FindSet(false, false) then
+            repeat
+                Window.Update(1, IntegrationCompany."Company Name");
+                Customer.ChangeCompany(IntegrationCompany."Company Name");
+                blockCustomer.ChangeCompany(IntegrationCompany."Company Name");
+
+                // block deduplicated customer
+                Customer.SetCurrentKey("No.", "Deduplicate Id", Blocked);
+                Customer.SetFilter("Deduplicate Id", '<>%1', blanckGuid);
+                Customer.SetFilter(Blocked, '<>%1', Customer.Blocked::All);
+                if Customer.FindSet(true, false) then
+                    repeat
+                        Customer.CalcFields("Balance (LCY)");
+                        if Customer."Balance (LCY)" = 0 then begin
+                            Window.Update(2, Customer."No.");
+                            blockCustomer.Get(Customer."No.");
+                            blockCustomer.Blocked := blockCustomer.Blocked::All;
+                            blockCustomer.Modify()
+                        end;
+                    until Customer.Next() = 0;
+            until IntegrationCompany.Next() = 0;
+        Window.Close;
     end;
 }

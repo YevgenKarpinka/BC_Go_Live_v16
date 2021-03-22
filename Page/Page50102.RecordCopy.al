@@ -68,6 +68,38 @@ page 50102 "Record Copying"
                 end;
 
             }
+            action("UpdateCustBankAcc")
+            {
+                CaptionML = ENU = 'Update Cust Bank Acc';
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                ApplicationArea = All;
+
+                trigger OnAction()
+                var
+                    RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                begin
+                    RecordCopyMgt.UpdateBankAccounts();
+                end;
+
+            }
+            action("BlockDeduplCust")
+            {
+                CaptionML = ENU = 'Block Deduplicated Customers';
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                ApplicationArea = All;
+
+                trigger OnAction()
+                var
+                    RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                begin
+                    RecordCopyMgt.BlockDeduplCust();
+                end;
+
+            }
         }
     }
 }
