@@ -51,11 +51,10 @@ codeunit 50101 "Record Deletion Mgt."
         Text0001: Label 'Delete Records?';
         Text0002: Label 'Deleting Records!\Table: #1#######';
 
-    procedure DeleteRecords()
+    procedure DeleteRecords(RecordDeletionTable: Record "Record Deletion Table")
     var
         Window: Dialog;
         RecRef: RecordRef;
-        RecordDeletionTable: Record "Record Deletion Table";
     begin
         if not Confirm(Text0001, false) then
             exit;

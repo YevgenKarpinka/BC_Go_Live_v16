@@ -50,8 +50,10 @@ page 50101 "Record Deletion"
                 trigger OnAction()
                 var
                     RecordDeletionMgt: Codeunit "Record Deletion Mgt.";
+                    RecDel: Record "Record Deletion Table";
                 begin
-                    RecordDeletionMgt.DeleteRecords; //START DELETE RECORDS
+                    CurrPage.SetSelectionFilter(RecDel);
+                    RecordDeletionMgt.DeleteRecords(RecDel); //START DELETE RECORDS
                 end;
 
             }
